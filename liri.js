@@ -84,11 +84,11 @@ function movieThis(search) {
             context += "\nYear: " + JSON.parse(body).Year;
             context += "\nRated: " + JSON.parse(body).Rated;
             context += "\nIMDB Rating: " + JSON.parse(body).imdbRating;
+            context += "\nRotten Tomatoes Rating: " + JSON.parse(body).Ratings[1].Value;
             context += "\nCountry: " + JSON.parse(body).Country;
             context += "\nLanguage: " + JSON.parse(body).Language;
             context += "\nPlot: " + JSON.parse(body).Plot;
             context += "\nActors: " + JSON.parse(body).Actors;
-            context += "\nRotten Tomatoes Rating: " + JSON.parse(body).Ratings[1].Value;
             console.log(context);
             write2File(context);
         }
@@ -136,10 +136,10 @@ function caseWhich(option, search) {
 
 // Append data to file
 function write2File(context) {
-    fs.appendFile("query.txt", context, function (err) {
+    fs.appendFile("log.txt", context, function (err) {
         if (err) {
             return console.log(err);
         }
-        console.log("query.txt was updated!");
+        console.log("log.txt was updated!");
     });
 }
