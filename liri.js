@@ -9,8 +9,9 @@ var fs = require("fs");
 var bandsintown = require('bandsintown')('codingbootcamp');
 var context = '';
 
+// Check if arguments are given. If not, prompt the user
 if (process.argv[2]) {
-    caseWhich(process.argv[2], process.argv[3]);
+    caseWhich(process.argv[2], process.argv.slice(3).join(" "));
 } else {
     inquirer
         .prompt([
@@ -33,6 +34,8 @@ if (process.argv[2]) {
         });
 }
 
+
+// concert-this function to determine where and when a concert will be held
 function concertThis(search) {
     bandsintown
         .getArtistEventList(search)
@@ -50,41 +53,28 @@ function concertThis(search) {
         });
 }
 
+// spotify-this-song function to determine what the music might be
 function spotifyThisSong(music) {
-    console.log("We're Here " + music);
-
-    // function checkMusic(music) {
-    //     // If no song is given default to song.txt
-    //     if (music === 'undefined' || music === '') {
-    //         fs.readFile("song.txt", "utf8", function (error, data) {
-    //             if (error) {
-    //                 return console.log(error);
-    //             }
-    //             console.log("NOTHING " + data);
-    //             var dataArr = data.split(",");
-    //             music = dataArr[1];
-    //             music = "The Sign";
-    //         });
-
-            spotify.search({ type: 'track', query: music }, function (err, data) {
-                if (err) {
-                    return console.log('Error occurred: ' + err);
-                }
-                for (var i = 0; i < data.tracks.items.length; i++) {
-                    var musicData = data.tracks.items[i];
-                    context = i;
-                    context += "\nartist(s): " + musicData.artists[0].name;
-                    context += "\nsong name: " + musicData.name;
-                    context += "\npreview song: " + musicData.preview_url;
-                    context += "\nalbum: " + musicData.album.name;
-                    context += "\n------------------------------";
-                    console.log(context);
-                }
-                write2File(context);
-            });
+    spotify.search({ type: 'track', query: music }, function (err, data) {
+        if (err) {
+            return console.log('Error occurred: ' + err);
         }
-//     }
-// }
+        context = '';
+        for (var i = 0; i < data.tracks.items.length; i++) {
+            var musicData = data.tracks.items[i];
+            context += i;
+            context += "\nartist(s): " + musicData.artists[0].name;
+            context += "\nsong name: " + musicData.name;
+            context += "\npreview song: " + musicData.preview_url;
+            context += "\nalbum: " + musicData.album.name;
+            context += "\n------------------------------";
+        }
+        console.log(context);
+        write2File(context);
+    });
+}
+
+// movie-this function to find information on a movie
 function movieThis(search) {
     var queryUrl = "http://www.omdbapi.com/?t=" + search + "&y=&plot=short&apikey=trilogy";
     request(queryUrl, function (error, response, body) {
@@ -105,6 +95,7 @@ function movieThis(search) {
     });
 }
 
+// do-what-it-says function to run what is found in a file
 function doWhatItSays() {
     fs.readFile("random.txt", "utf8", function (error, data) {
         if (error) {
@@ -115,29 +106,27 @@ function doWhatItSays() {
     });
 }
 
+// Determine which type of information is sought
 function caseWhich(option, search) {
-
-    // if (option === 'spotifyThisSong' && search === 'undefined') {
-    //     fs.readFile("song.txt", "utf8", function (error, data) {
-    //         if (error) {
-    //             return console.log(error);
-    //         }
-    //         console.log("NOTHING " + data);
-    //         var dataArr = data.split(",");
-    //         music = dataArr[1];
-    //         search = "The Sign";
-    //     });
-    // }
-
     switch (option) {
         case "concert-this":
             concertThis(search);
             break;
         case "spotify-this-song":
-            spotifyThisSong(search);
+            if (search === '') {
+                search = "The Sign";
+                spotifyThisSong(search);
+            } else {
+                spotifyThisSong(search);
+            }
             break;
         case "movie-this":
-            movieThis(search);
+            if (search === '') {
+                search = "Mr. Nobody";
+                spotifyThisSong(search);
+            } else {
+                movieThis(search);
+            }
             break;
         case "do-what-it-says":
             doWhatItSays();
@@ -145,9 +134,9 @@ function caseWhich(option, search) {
     }
 }
 
+// Append data to file
 function write2File(context) {
-    // appendFile if needed in future
-    fs.writeFile("query.txt", context, function (err) {
+    fs.appendFile("query.txt", context, function (err) {
         if (err) {
             return console.log(err);
         }
